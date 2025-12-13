@@ -3,1510 +3,281 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Davos 2026 | House Events Guide</title>
-
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+  <title>Intake + Remember Me</title>
 
   <style>
-    :root{
-      /* === WEF Davos 2026-inspired palette (from the page screenshot) === */
-      --bg-950: #030609;      /* near-black */
-      --bg-900: #0b1120;      /* deep navy */
-      --navy-900: #172134;    /* dark slate/nav */
-      --navy-800: #0a3182;    /* primary hero blue */
-      --navy-700: #062a7b;    /* deeper blue */
-      --blue-600: #0065f2;    /* button blue */
-      --blue-500: #4568b2;    /* lighter accent */
-      --text: #ffffff;
-      --muted: #afc2e6;
-      --muted-2: rgba(175, 194, 230, 0.75);
-      --border: rgba(255,255,255,0.12);
-      --border-soft: rgba(255,255,255,0.08);
-
-      --glass: rgba(11, 17, 32, 0.60);
-      --glass-2: rgba(23, 33, 52, 0.55);
-
-      --shadow: 0 20px 60px rgba(0,0,0,0.45);
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body{
-      font-family: "Inter", sans-serif;
-      background: radial-gradient(1200px 700px at 50% 20%, rgba(10,49,130,0.55) 0%, rgba(3,6,9,1) 60%),
-                  linear-gradient(180deg, var(--bg-950) 0%, var(--bg-900) 100%);
-      color: var(--text);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* Animated Background */
-    .bg-animation{
-      position: fixed; inset: 0; z-index: -1; overflow: hidden;
-    }
-    .bg-animation::before{
-      content:"";
-      position:absolute;
-      inset:-40%;
-      background:
-        radial-gradient(ellipse at 35% 20%, rgba(0,101,242,0.28) 0%, transparent 55%),
-        radial-gradient(ellipse at 70% 35%, rgba(10,49,130,0.22) 0%, transparent 55%),
-        radial-gradient(ellipse at 25% 75%, rgba(69,104,178,0.18) 0%, transparent 50%);
-      filter: blur(0px);
-      animation: bgMove 20s ease-in-out infinite;
-      transform: translate3d(0,0,0);
-    }
-    @keyframes bgMove{
-      0%,100% { transform: translate(0,0) rotate(0deg) scale(1); }
-      33%     { transform: translate(2%,1%) rotate(0.8deg) scale(1.02); }
-      66%     { transform: translate(-1%,2%) rotate(-0.6deg) scale(1.01); }
-    }
-
-    /* Header */
-    header{
-      position: relative;
-      padding: 56px 28px 44px;
-      text-align: center;
-      border-bottom: 1px solid var(--border-soft);
-    }
-    .logo-container{ margin-bottom: 22px; }
-
-    .logo{
-      font-family: "Inter", sans-serif;
-      font-size: clamp(2.1rem, 5vw, 4rem);
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      line-height: 1.06;
-      background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.92) 30%, rgba(175,194,230,0.92) 62%, rgba(0,101,242,0.95) 100%);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-      animation: shimmer 3.2s ease-in-out infinite;
-    }
-    @keyframes shimmer{
-      0%,100% { filter: brightness(1); }
-      50% { filter: brightness(1.15); }
-    }
-
-    .tagline{
-      margin-top: 10px;
-      font-size: 0.95rem;
-      letter-spacing: 0.28em;
-      text-transform: uppercase;
-      color: var(--muted-2);
-    }
-
-    .dates-badge{
-      display:inline-block;
-      margin-top: 20px;
-      padding: 11px 22px;
-      border: 1px solid rgba(0,101,242,0.65);
-      border-radius: 999px;
-      font-size: 0.9rem;
-      letter-spacing: 0.12em;
-      color: rgba(255,255,255,0.92);
-      background: linear-gradient(180deg, rgba(0,101,242,0.14) 0%, rgba(10,49,130,0.08) 100%);
-      position: relative;
-      overflow:hidden;
-    }
-    .dates-badge::before{
-      content:"";
-      position:absolute; top:0; left:-120%;
-      width:120%; height:100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
-      animation: slideBadge 3.5s ease-in-out infinite;
-    }
-    @keyframes slideBadge{
-      0% { left:-120%; }
-      100% { left:120%; }
-    }
-
-    /* Navigation */
-    .day-nav{
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(3,6,9,0.85);
-      backdrop-filter: blur(18px);
-      padding: 16px 0;
-      border-bottom: 1px solid var(--border-soft);
-    }
-    .day-tabs{
-      display:flex;
-      justify-content:center;
-      gap: 10px;
-      flex-wrap: wrap;
-      padding: 0 16px;
-    }
-    .day-tab{
-      padding: 11px 18px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: 999px;
-      color: rgba(255,255,255,0.92);
-      font-size: 0.85rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      position: relative;
-      overflow:hidden;
-    }
-    .day-tab::before{
-      content:"";
-      position:absolute; inset:0;
-      background: linear-gradient(135deg, rgba(0,101,242,0.95), rgba(10,49,130,0.85));
-      opacity:0;
-      transition: opacity 0.25s ease;
-    }
-    .day-tab:hover{
-      transform: translateY(-2px);
-      border-color: rgba(0,101,242,0.55);
-    }
-    .day-tab.active{
-      border-color: transparent;
-    }
-    .day-tab.active::before{ opacity:1; }
-    .day-tab span{ position: relative; z-index: 1; }
-    .day-tab .day-name{
-      display:block;
-      font-size: 0.7rem;
-      opacity: 0.78;
-      margin-top: 2px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    /* Stats */
-    .stats-bar{
-      display:flex;
-      justify-content:center;
-      gap: 36px;
-      padding: 26px 16px;
-      border-bottom: 1px solid var(--border-soft);
-    }
-    .stat{ text-align:center; }
-    .stat-value{
-      font-family: "Inter", sans-serif;
-      font-size: 2.2rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(175,194,230,0.92), rgba(0,101,242,0.95));
-      -webkit-background-clip:text;
-      background-clip:text;
-      color: transparent;
-    }
-    .stat-label{
-      margin-top: 6px;
-      font-size: 0.72rem;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--muted-2);
-    }
-
-    /* Search */
-    .search-container{
-      max-width: 560px;
-      margin: 0 auto 18px;
-      padding: 0 16px;
-    }
-    .search-input{
-      width:100%;
-      padding: 14px 18px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 999px;
-      color: var(--text);
-      font-size: 1rem;
-      outline: none;
-      transition: all 0.2s ease;
-    }
-    .search-input:focus{
-      border-color: rgba(0,101,242,0.7);
-      box-shadow: 0 0 0 6px rgba(0,101,242,0.12);
-    }
-    .search-input::placeholder{ color: rgba(175,194,230,0.55); }
-
-    /* Filter Bar */
-    .filter-bar{
-      display:flex;
-      justify-content:center;
-      gap: 10px;
-      padding: 10px 16px 26px;
-      flex-wrap: wrap;
-    }
-    .filter-btn{
-      padding: 8px 14px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 999px;
-      color: rgba(255,255,255,0.86);
-      font-size: 0.82rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .filter-btn:hover, .filter-btn.active{
-      background: rgba(0,101,242,0.20);
-      border-color: rgba(0,101,242,0.55);
-      color: #fff;
-    }
-
-    /* Main Content */
-    main{
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 32px 18px 56px;
-    }
-    .day-section{ display:none; }
-    .day-section.active{
-      display:block;
-      animation: fadeIn 0.35s ease-out;
-    }
-    @keyframes fadeIn{
-      from{ opacity:0; transform: translateY(14px); }
-      to{ opacity:1; transform: translateY(0); }
-    }
-
-    .day-header{
-      text-align:center;
-      margin-bottom: 32px;
-    }
-    .day-title{
-      font-family: "Playfair Display", serif;
-      font-size: 2.6rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-      letter-spacing: -0.02em;
-    }
-    .event-count{
-      font-size: 0.86rem;
-      color: rgba(175,194,230,0.70);
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-    }
-
-    /* Grid */
-    .events-grid{
-      display:grid;
-      grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
-      gap: 18px;
-    }
-    @media (max-width: 480px){
-      .events-grid{ grid-template-columns: 1fr; }
-      .stats-bar{ gap: 18px; }
-    }
-
-    /* Event Card */
-    .event-card{
-      background: linear-gradient(145deg, rgba(23,33,52,0.62), rgba(11,17,32,0.72));
-      border: 1px solid var(--border-soft);
-      border-radius: 22px;
-      padding: 22px;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.20);
-    }
-    .event-card::before{
-      content:"";
-      position:absolute; top:0; left:0;
-      width:100%; height: 3px;
-      background: linear-gradient(90deg, rgba(0,101,242,0.95), rgba(10,49,130,0.95), rgba(69,104,178,0.95));
-      transform: scaleX(0);
-      transform-origin:left;
-      transition: transform 0.25s ease;
-    }
-    .event-card:hover{
-      transform: translateY(-6px);
-      border-color: rgba(255,255,255,0.16);
-      box-shadow: var(--shadow);
-    }
-    .event-card:hover::before{ transform: scaleX(1); }
-
-    .event-time{
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      margin-bottom: 12px;
-    }
-    .time-badge{
-      padding: 6px 12px;
-      background: rgba(0,101,242,0.16);
-      border: 1px solid rgba(0,101,242,0.35);
-      border-radius: 999px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: rgba(255,255,255,0.92);
-      letter-spacing: 0.03em;
-    }
-
-    .event-name{
-      font-family: "Playfair Display", serif;
-      font-size: 1.28rem;
-      font-weight: 700;
-      line-height: 1.35;
-      margin-bottom: 10px;
-      transition: color 0.2s ease;
-    }
-    .event-card:hover .event-name{ color: rgba(175,194,230,0.98); }
-
-    .event-organizer{
-      font-size: 0.86rem;
-      color: rgba(175,194,230,0.92);
-      margin-bottom: 10px;
-      font-weight: 600;
-    }
-    .event-address{
-      font-size: 0.86rem;
-      color: rgba(175,194,230,0.70);
-      line-height: 1.45;
-    }
-
-    .event-meta{
-      display:flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 16px;
-      padding-top: 14px;
-      border-top: 1px solid rgba(255,255,255,0.08);
-    }
-    .meta-tag{
-      padding: 6px 10px;
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 999px;
-      font-size: 0.74rem;
-      color: rgba(255,255,255,0.86);
-    }
-    .meta-tag.vibe{
-      background: linear-gradient(135deg, rgba(0,101,242,0.22), rgba(10,49,130,0.16));
-      border-color: rgba(0,101,242,0.18);
-      color: #fff;
-    }
-    .meta-tag.rsvp{
-      background: rgba(69,104,178,0.18);
-      border-color: rgba(69,104,178,0.28);
-      color: #fff;
-    }
-
-    .event-link{
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      margin-top: 16px;
-      padding: 10px 16px;
-      background: linear-gradient(135deg, rgba(0,101,242,0.95), rgba(10,49,130,0.85));
-      border: 1px solid rgba(255,255,255,0.10);
-      border-radius: 999px;
-      color:#fff;
-      text-decoration:none;
-      font-size: 0.85rem;
-      font-weight: 700;
-      cursor:pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .event-link:hover{
-      transform: translateY(-1px);
-      box-shadow: 0 12px 28px rgba(0,101,242,0.22);
-    }
-
-    /* Modal */
-    .modal-overlay{
-      display:none;
-      position:fixed; inset:0;
-      background: rgba(0,0,0,0.78);
-      backdrop-filter: blur(10px);
-      z-index: 1000;
-      align-items:center;
-      justify-content:center;
-      padding: 18px;
-    }
-    .modal-overlay.active{
-      display:flex;
-      animation: modalFadeIn 0.2s ease-out;
-    }
-    @keyframes modalFadeIn{ from{opacity:0;} to{opacity:1;} }
-
-    .modal-content{
-      background: linear-gradient(145deg, rgba(23,33,52,0.92), rgba(11,17,32,0.92));
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: 24px;
-      max-width: 680px;
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 24px; background:#0b0f18; color:#e8eefc; }
+    .wrap { max-width: 980px; margin: 0 auto; }
+    .card { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); border-radius: 16px; padding: 20px; }
+    h1 { margin: 0 0 10px; font-size: 22px; }
+    p { margin: 0 0 16px; color: rgba(232,238,252,0.85); }
+    label { display:block; margin: 12px 0 6px; font-weight: 600; }
+    input, select, textarea {
       width: 100%;
-      max-height: 90vh;
-      overflow-y:auto;
-      padding: 28px;
-      position: relative;
-      box-shadow: var(--shadow);
-      animation: modalSlideIn 0.25s ease-out;
-    }
-    @keyframes modalSlideIn{
-      from{ transform: translateY(18px); opacity:0; }
-      to{ transform: translateY(0); opacity:1; }
-    }
-    .modal-close{
-      position:absolute; top: 14px; right: 14px;
-      width: 40px; height: 40px;
-      border-radius: 50%;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      color:#fff;
-      font-size: 1.5rem;
-      cursor:pointer;
-      transition: all 0.2s ease;
-    }
-    .modal-close:hover{
-      background: rgba(0,101,242,0.22);
-      border-color: rgba(0,101,242,0.45);
-      transform: rotate(90deg);
-    }
-    .modal-title{
-      font-family:"Playfair Display", serif;
-      font-size: 1.9rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-      padding-right: 48px;
-    }
-    .modal-organizer{
-      color: rgba(175,194,230,0.92);
-      font-size: 1rem;
-      margin-bottom: 18px;
-      font-weight: 600;
-    }
-    .modal-details{ display:grid; gap: 14px; }
-    .detail-row{ display:flex; gap: 12px; align-items:flex-start; }
-    .detail-icon{
-      width: 40px; height: 40px;
+      padding: 12px 12px;
       border-radius: 12px;
-      background: rgba(0,101,242,0.14);
-      border: 1px solid rgba(0,101,242,0.22);
-      display:flex; align-items:center; justify-content:center;
-      flex-shrink:0;
-      font-size: 1.1rem;
-    }
-    .detail-content h4{
-      font-size: 0.72rem;
-      color: rgba(175,194,230,0.70);
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      margin-bottom: 4px;
-    }
-    .detail-content p{
-      font-size: 0.98rem;
-      line-height: 1.5;
-      color: rgba(255,255,255,0.92);
-      white-space: pre-wrap;
-    }
-
-    /* Footer */
-    footer{
-      text-align:center;
-      padding: 56px 16px;
-      border-top: 1px solid var(--border-soft);
-      margin-top: 40px;
-    }
-    .footer-logo{
-      font-family: "Inter", sans-serif;
-      font-weight: 800;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      opacity: 0.7;
-      margin-bottom: 10px;
-    }
-    .footer-text{
-      font-size: 0.82rem;
-      color: rgba(175,194,230,0.68);
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-
-    /* Empty State */
-    .no-results{
-      text-align:center;
-      padding: 64px 16px;
-      color: rgba(175,194,230,0.70);
-    }
-    .no-results h3{
-      font-family: "Playfair Display", serif;
-      font-size: 1.6rem;
-      margin-bottom: 10px;
-      color: #fff;
-    }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar{ width: 8px; }
-    ::-webkit-scrollbar-track{ background: rgba(3,6,9,0.7); }
-    ::-webkit-scrollbar-thumb{ background: rgba(0,101,242,0.55); border-radius: 6px; }
-
-    /* Gate */
-    #gate-wrapper{
-      position: relative;
-      min-height: 100vh;
-      padding: 34px 16px 56px;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:flex-start;
-    }
-    #gate-wrapper header{ border-bottom:none; padding: 42px 16px 20px; }
-    .gate-main{ max-width: 520px; width: 100%; margin: 0 auto; }
-    .gate-card{
-      background: rgba(11,17,32,0.72);
-      border-radius: 22px;
       border: 1px solid rgba(255,255,255,0.14);
-      padding: 22px 18px 24px;
-      box-shadow: var(--shadow);
+      background: rgba(0,0,0,0.25);
+      color: #e8eefc;
+      outline: none;
     }
-    .gate-card h2{
-      font-family:"Playfair Display", serif;
-      font-size: 1.5rem;
-      margin-bottom: 6px;
+    input::placeholder, textarea::placeholder { color: rgba(232,238,252,0.55); }
+    .row { display:grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 720px){ .row{ grid-template-columns:1fr; } }
+
+    .btns { display:flex; gap:10px; flex-wrap: wrap; margin-top: 16px; }
+    button {
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-weight: 700;
+      cursor: pointer;
+      background: #4f7cff;
+      color: #06102a;
     }
-    .gate-card p{
-      font-size: 0.92rem;
-      color: rgba(175,194,230,0.84);
-      margin-bottom: 14px;
-      line-height: 1.5;
-    }
-    .gate-label{
-      font-size: 0.86rem;
-      display:block;
-      margin-bottom: 6px;
-      color: rgba(255,255,255,0.88);
-      font-weight: 600;
-    }
-    .gate-input{
-      width:100%;
-      margin-bottom: 12px;
-      padding: 11px 12px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.03);
-      color: #fff;
-      font-size: 0.95rem;
-      outline:none;
-      transition: all 0.2s ease;
-    }
-    .gate-input:focus{
-      border-color: rgba(0,101,242,0.65);
-      box-shadow: 0 0 0 6px rgba(0,101,242,0.12);
-    }
-    .gate-roles{
-      display:flex;
-      flex-wrap:wrap;
-      gap: 10px;
-      font-size: 0.88rem;
-      margin-bottom: 14px;
-      color: rgba(255,255,255,0.88);
-    }
-    .gate-roles label{
-      display:inline-flex;
-      align-items:center;
-      gap: 6px;
-      padding: 6px 10px;
-      border-radius: 999px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.10);
-    }
-    .gate-submit{
-      width:100%;
-      padding: 12px 0;
-      border:none;
-      border-radius: 999px;
-      background: linear-gradient(135deg, rgba(0,101,242,0.98), rgba(10,49,130,0.88));
-      color:#fff;
-      font-weight: 800;
-      font-size: 0.98rem;
-      cursor:pointer;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .gate-submit:hover{
-      transform: translateY(-1px);
-      box-shadow: 0 14px 30px rgba(0,101,242,0.22);
-    }
-    #formMessage{ margin-top: 10px; font-size: 0.85rem; }
+    button.secondary { background: rgba(255,255,255,0.12); color:#e8eefc; border:1px solid rgba(255,255,255,0.16); }
+    .small { font-size: 13px; color: rgba(232,238,252,0.75); margin-top: 10px; }
+    .hidden { display:none !important; }
+    .pill { display:inline-block; padding:6px 10px; border-radius:999px; background: rgba(79,124,255,0.18); border: 1px solid rgba(79,124,255,0.35); color:#dbe6ff; font-weight:700; font-size:12px; }
+    .kv { display:grid; grid-template-columns: 160px 1fr; gap:8px 14px; margin-top: 12px; }
+    .kv div { padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.10); }
+    .kv .k { color: rgba(232,238,252,0.75); font-weight:700; }
   </style>
 </head>
 
 <body>
-  <div class="bg-animation"></div>
+  <div class="wrap">
 
-  <!-- GATE FORM WRAPPER -->
-  <div id="gate-wrapper">
-    <header>
-      <div class="logo-container">
-        <h1 class="logo">Davos House Guide</h1>
-        <p class="tagline">WEF Week 2026</p>
-      </div>
-      <div class="dates-badge">January 17 – 23, 2026 • Davos, Switzerland</div>
-    </header>
+    <!-- VIEW A: Intake Form (shown only if user has no saved intake) -->
+    <section id="intakeView" class="card hidden">
+      <h1>Quick Intake</h1>
+      <p>Fill this once. Next time you come back, we’ll remember it on this device.</p>
 
-    <main class="gate-main">
-      <form id="leadForm" class="gate-card">
-        <h2>Unlock the curated Davos guide</h2>
-        <p>Enter your details to access the Davos Houses, lounges, and key events list.</p>
-
-        <label class="gate-label" for="name">Full name</label>
-        <input type="text" id="name" class="gate-input" required>
-
-        <label class="gate-label" for="phone">Phone number</label>
-        <input type="tel" id="phone" class="gate-input" required>
-
-        <label class="gate-label" for="email">Email</label>
-        <input type="email" id="email" class="gate-input" required>
-
-        <p class="gate-label" style="margin-top:8px;">I am a:</p>
-        <div class="gate-roles">
-          <label><input type="checkbox" name="role" value="Investor"> Investor</label>
-          <label><input type="checkbox" name="role" value="Founder"> Founder</label>
-          <label><input type="checkbox" name="role" value="Media"> Media</label>
-          <label><input type="checkbox" name="role" value="Operator"> Operator</label>
+      <form id="intakeForm">
+        <!-- Replace these fields with YOUR real intake form fields -->
+        <div class="row">
+          <div>
+            <label for="firstName">First name</label>
+            <input id="firstName" name="firstName" placeholder="e.g., Jose" required />
+          </div>
+          <div>
+            <label for="lastName">Last name</label>
+            <input id="lastName" name="lastName" placeholder="e.g., Prado" required />
+          </div>
         </div>
 
-        <button type="submit" class="gate-submit">View Davos Guide</button>
-        <p id="formMessage"></p>
+        <div class="row">
+          <div>
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="you@email.com" required />
+          </div>
+          <div>
+            <label for="country">Country</label>
+            <input id="country" name="country" placeholder="e.g., Honduras" />
+          </div>
+        </div>
+
+        <label for="interest">What are you here for?</label>
+        <select id="interest" name="interest" required>
+          <option value="" disabled selected>Select one</option>
+          <option>Events</option>
+          <option>Networking</option>
+          <option>VIP Access</option>
+          <option>Other</option>
+        </select>
+
+        <label for="notes">Notes (optional)</label>
+        <textarea id="notes" name="notes" rows="4" placeholder="Anything we should know?"></textarea>
+
+        <div class="btns">
+          <button type="submit">Continue</button>
+          <button type="button" class="secondary" id="clearBtn">Reset</button>
+        </div>
+
+        <div class="small">
+          Saved locally on this device using localStorage. If you switch devices or clear browser data, you’ll need to fill it again.
+        </div>
       </form>
-    </main>
-  </div>
+    </section>
 
-  <!-- ACTUAL SITE CONTENT (INITIALLY HIDDEN) -->
-  <div id="site-content" style="display:none;">
-    <header>
-      <div class="logo-container">
-        <h1 class="logo">Davos House Guide</h1>
-        <p class="tagline">WEF Week 2026</p>
+    <!-- VIEW B: Main Site Content (shown after intake exists) -->
+    <section id="mainView" class="card hidden">
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div>
+          <span class="pill">Welcome back</span>
+          <h1 style="margin-top:10px;">You’re in 🎉</h1>
+          <p id="welcomeLine">Loading your info…</p>
+        </div>
+
+        <div class="btns" style="margin-top:0;">
+          <button type="button" class="secondary" id="editBtn">Edit details</button>
+          <button type="button" class="secondary" id="forgetBtn">Forget this device</button>
+        </div>
       </div>
-      <div class="dates-badge">January 17 – 23, 2026 • Davos, Switzerland</div>
-    </header>
 
-    <nav class="day-nav">
-      <div class="day-tabs" id="dayTabs"></div>
-    </nav>
+      <!-- Optional: Show saved intake summary -->
+      <div id="summary" class="kv"></div>
 
-    <div class="stats-bar">
-      <div class="stat">
-        <div class="stat-value" id="totalEvents">0</div>
-        <div class="stat-label">Total Entries</div>
+      <hr style="border:0; border-top:1px solid rgba(255,255,255,0.12); margin:18px 0;" />
+
+      <!-- ✅ Put your actual site here (events guide, dashboard, etc.) -->
+      <div id="siteContent">
+        <h2 style="margin:0 0 10px;">Main Content</h2>
+        <p style="margin:0; color:rgba(232,238,252,0.85);">
+          Replace this section with your Art Basel / Davos page content.
+        </p>
       </div>
-      <div class="stat">
-        <div class="stat-value" id="totalDays">0</div>
-        <div class="stat-label">Tabs</div>
-      </div>
-      <div class="stat">
-        <div class="stat-value" id="currentDayEvents">0</div>
-        <div class="stat-label">Shown</div>
-      </div>
-    </div>
+    </section>
 
-    <div class="search-container">
-      <input type="text" class="search-input" id="searchInput" placeholder="Search houses, lounges, locations, notes...">
-    </div>
-
-    <div class="filter-bar">
-      <button class="filter-btn active" data-filter="all">All</button>
-      <button class="filter-btn" data-filter="allweek">All Week</button>
-      <button class="filter-btn" data-filter="places">Places</button>
-      <button class="filter-btn" data-filter="rsvp">RSVP</button>
-      <button class="filter-btn" data-filter="on">ON Promenade</button>
-      <button class="filter-btn" data-filter="off">OFF Promenade</button>
-    </div>
-
-    <main id="mainContent"></main>
-
-    <!-- Modal -->
-    <div class="modal-overlay" id="modal">
-      <div class="modal-content">
-        <button class="modal-close" onclick="closeModal()">×</button>
-        <h2 class="modal-title" id="modalTitle"></h2>
-        <p class="modal-organizer" id="modalOrganizer"></p>
-        <div class="modal-details" id="modalDetails"></div>
-      </div>
-    </div>
-
-    <footer>
-      <div class="footer-logo">DAVOS • 2026</div>
-      <p class="footer-text">Houses • Lounges • Key Locations</p>
-    </footer>
   </div>
 
   <script>
-    // === GOOGLE SHEETS FORM ENDPOINT ===
-    const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxiVttnF2evrhwNsdRRgL506mAaYynEDNWEMd-5lWY4k5B_jzKiWr7AmbBOB-XY8JiM/exec';
+    /**
+     * Simple "remember intake" using localStorage.
+     * - Stores form values on submit
+     * - On load: if data exists, skip intake form and show main content
+     */
 
-    // === EVENTS (REPLACED WITH Davos-House_Events - Sheet1.csv) ===
-    const eventsData = {
-      "ALL_WEEK": {
-        "day_name": "All Week",
-        "month_day": "Jan 17\u201323",
-        "events": [
-          {
-            "event": "Abraham House",
-            "organizer": "OFF Promenade",
-            "address": "Talstrasse 52, 7270 Davos, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "RSVP",
-            "vibe": "House",
-            "link": "https://abrahamhouseglobal.org/davos2026",
-            "food": false,
-            "bar": false,
-            "note": "From January 19\u201322, 2026, Abraham House returns to Davos as a hub for meaningful dialogue and collaboration during the World Economic Forum Annual Meeting. Hosted at the historic Hotel Ochsen, this exclusive space will welcome global leaders, innovators, investors, and changemakers across sectors.\n\nAbraham House offers:\n\u2022 High-level panels and policy discussions\n\u2022 Curated networking dinners and receptions\n\u2022 Private meeting rooms and partner activations\n\u2022 Thought leadership on pressing global issues\n\nBy invitation and RSVP only."
-          },
-          {
-            "event": "Belvedere Private Office",
-            "organizer": "ON Promenade",
-            "address": "Promenade 89, 7270 Davos, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "RSVP",
-            "vibe": "House",
-            "link": "https://www.globalconversations.ch/davos-2026/belvedere",
-            "food": false,
-            "bar": false,
-            "note": "Step away from the noise of Davos and into absolute discretion. The Belvedere Private Office is an invitation-only sanctuary designed for senior decision-makers who need a trusted environment for private meetings, deal-making, and strategic conversations.\n\nLocated directly on Promenade, the Belvedere offers:\n\u2022 Secure private offices and meeting rooms\n\u2022 Concierge-style hosting\n\u2022 Quiet working space\n\u2022 Tailored introductions and curated networking\n\nIdeal for executives, investors, family offices, and global leaders seeking privacy and efficiency during WEF week."
-          },
-          {
-            "event": "CNBC House",
-            "organizer": "ON Promenade",
-            "address": "Promenade 68, 7270 Davos, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "RSVP",
-            "vibe": "House",
-            "link": "https://www.cnbcevents.com/davos-2026/",
-            "food": false,
-            "bar": false,
-            "note": "In 2026, CNBC House will open its doors for the annual gathering of global leaders at the World Economic Forum in Davos.\n\nCNBC House programming typically includes:\n\u2022 Live interviews and broadcast segments\n\u2022 Panel discussions with CEOs and policymakers\n\u2022 Networking receptions and curated sessions\n\nRSVP and access may be limited and subject to approval."
-          },
-          {
-            "event": "Davos Lodge",
-            "organizer": "ON Promenade",
-            "address": "Promenade 12, 7270 Davos Platz, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "RSVP",
-            "vibe": "House",
-            "link": "https://www.davoslodge.ch/",
-            "food": false,
-            "bar": false,
-            "note": "The Davos Lodge is a premium hospitality and meeting space during WEF week. Expect private meetings, curated events, and an executive lounge environment."
-          },
-          {
-            "event": "Davos Innovation Week",
-            "organizer": "",
-            "address": "",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "https://davosinnovationweek.com/",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "FQ LOUNGE",
-            "organizer": "",
-            "address": "Promenade 63, 7270 Davos, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "https://fintechq.dk/davos2026/",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "GBBC\u2019s Blockchain Central Davos",
-            "organizer": "",
-            "address": "",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "https://gbbcouncil.org/blockchain-central-davos/",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Deloitte at Davos",
-            "organizer": "",
-            "address": "",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "https://www2.deloitte.com/global/en/pages/about-deloitte/articles/deloitte-at-davos.html",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "The Economist",
-            "organizer": "ON Promenade",
-            "address": "Promenade 87, 7270 Davos Platz, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "RSVP",
-            "vibe": "House",
-            "link": "https://www.economist.com/davos/2026",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Executive Lounge (Belvedere)",
-            "organizer": "ON Promenade",
-            "address": "Promenade 89, 7270 Davos Platz, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "https://www.globalconversations.ch/davos-2026/executive-lounge",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Executive Lounge (Flower Shop)",
-            "organizer": "ON Promenade",
-            "address": "Promenade 67, 7270 Davos Platz, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "https://www.globalconversations.ch/davos-2026/executive-lounge",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Forbes Middle East",
-            "organizer": "",
-            "address": "",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "https://www.forbesmiddleeast.com/",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Frontiers Science House",
-            "organizer": "",
-            "address": "",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "https://www.frontiersin.org/about/frontiers-at-davos",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "FT House Lounge",
-            "organizer": "",
-            "address": "Promenade 18, 7270 Davos, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "https://partnercontent.ft.com/davos2026/",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Microsoft House",
-            "organizer": "",
-            "address": "",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "https://www.microsoft.com/en-us/industry/blog/2026/01/01/microsoft-at-davos-2026/",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Ukraine House",
-            "organizer": "",
-            "address": "Promenade 51, 7270 Davos Platz, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "https://www.ukrainehouse.org/",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Journal House (WSJ)",
-            "organizer": "",
-            "address": "",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "https://www.wsj.com/events/davos-2026",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Mountain Plaza unDavos Lounge",
-            "organizer": "ON Promenade",
-            "address": "Promenade 39, 7270 Davos Platz, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "https://www.globalconversations.ch/davos-2026/mountain-plaza",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Private Helicopter",
-            "organizer": "",
-            "address": "",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "SAP House",
-            "organizer": "",
-            "address": "Promenade 101, 7270 Davos, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "https://www.sap.com/about/events/davos.html",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Family Office Investors Summit",
-            "organizer": "",
-            "address": "",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "https://fo-summit.com/davos-2026/",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Secure Hotel Badge Pi",
-            "organizer": "",
-            "address": "Bahnhofstrasse 3, 7270 Davos Platz, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "https://securehotelbadgepi.com/davos/",
-            "food": false,
-            "bar": false,
-            "note": ""
-          }
-        ]
-      },
-      "PLACES": {
-        "day_name": "Places",
-        "month_day": "Jan 17\u201323",
-        "events": [
-          {
-            "event": "AI House",
-            "organizer": "ON Promenade",
-            "address": "Promenade 67, 7270 Davos, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Blackrock",
-            "organizer": "ON Promenade",
-            "address": "Promenade 38, 7270 Davos Platz, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Congress Hall",
-            "organizer": "",
-            "address": "46.800405926769145, 9.831510625646462",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Ice Village",
-            "organizer": "",
-            "address": "46.79852511190159, 9.826427057622928",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Kurpark Village/Registration/Media Village",
-            "organizer": "",
-            "address": "46.79919916402177, 9.82757111371351",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Human Change House",
-            "organizer": "ON Promenade",
-            "address": "Promenade 63, 7270 Davos, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Goals House",
-            "organizer": "",
-            "address": "Mattastrasse 25, 7260 Davos, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Google House",
-            "organizer": "",
-            "address": "Davos Dorf Promenade 116 Dorf, 7260 Davos, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "OpenAI House",
-            "organizer": "ON Promenade",
-            "address": "Promenade 53, 7270 Davos Platz, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "The Dome",
-            "organizer": "ON Promenade",
-            "address": "Promenade 71, 7270 Davos Platz, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "",
-            "food": false,
-            "bar": false,
-            "note": ""
-          },
-          {
-            "event": "Jakobshorn",
-            "organizer": "",
-            "address": "Jakobshorn, 7270 Davos, Switzerland",
-            "start": "TBA",
-            "end": "",
-            "door": "Info",
-            "vibe": "House",
-            "link": "",
-            "food": false,
-            "bar": false,
-            "note": ""
-          }
-        ]
-      },
+    const STORAGE_KEY = "intake:v1";
 
-      /* DAILY EVENTS (Jan 17–23, 2026) */
-      "2026-01-17": { "day_name":"Saturday","month_day":"January 17","events":[
-        {"event":"Jakobshorn Day Party","organizer":"","address":"Jakobshorn, 7270 Davos, Switzerland","start":"09:00:00","end":"","door":"Info","vibe":"Session","link":"","food":false,"bar":false,"note":""}
-      ]},
-      "2026-01-18": { "day_name":"Sunday","month_day":"January 18","events":[
-        {"event":"Davos Opening Party","organizer":"","address":"","start":"09:00:00","end":"","door":"Info","vibe":"Session","link":"","food":false,"bar":false,"note":""},
-        {"event":"The Future of AI \u2013 Welcome Reception","organizer":"","address":"","start":"12:00:00","end":"","door":"Info","vibe":"Session","link":"","food":false,"bar":false,"note":""},
-        {"event":"Davos Week Kickoff \u2013 Evening Session","organizer":"","address":"","start":"17:00:00","end":"","door":"Info","vibe":"Session","link":"","food":false,"bar":false,"note":""},
-        {"event":"Evening Networking","organizer":"","address":"","start":"18:00:00","end":"","door":"Info","vibe":"Session","link":"","food":false,"bar":false,"note":""}
-      ]},
-      "2026-01-19": { "day_name":"Monday","month_day":"January 19","events":[
-        {"event":"Morning Briefing","organizer":"","address":"","start":"09:30:00","end":"","door":"Info","vibe":"Session","link":"","food":false,"bar":false,"note":""}
-      ]},
-      "2026-01-20": { "day_name":"Tuesday","month_day":"January 20","events":[
-        {"event":"Investor Breakfast","organizer":"","address":"","start":"08:00:00","end":"","door":"Info","vibe":"Session","link":"","food":false,"bar":false,"note":""}
-      ]},
-      "2026-01-21": { "day_name":"Wednesday","month_day":"January 21","events":[
-        {"event":"Keynote Session","organizer":"","address":"","start":"10:00:00","end":"","door":"Info","vibe":"Session","link":"","food":false,"bar":false,"note":""}
-      ]},
-      "2026-01-22": { "day_name":"Thursday","month_day":"January 22","events":[
-        {"event":"Closing Conversations","organizer":"","address":"","start":"10:00:00","end":"","door":"Info","vibe":"Session","link":"","food":false,"bar":false,"note":""}
-      ]},
-      "2026-01-23": { "day_name":"Friday","month_day":"January 23","events":[
-        {"event":"Departure / Wrap-up","organizer":"","address":"","start":"00:00:00","end":"","door":"Info","vibe":"Session","link":"","food":false,"bar":false,"note":""}
-      ]}
-    };
+    const intakeView = document.getElementById("intakeView");
+    const mainView   = document.getElementById("mainView");
 
-    // NOTE:
-    // The CSV had many daily rows. If you want *every single daily row* embedded,
-    // paste the full exported JSON block into eventsData (this snippet keeps the All Week + Places fully, and leaves daily concise).
+    const intakeForm = document.getElementById("intakeForm");
+    const clearBtn   = document.getElementById("clearBtn");
 
-    // --- State ---
-    const isISODateKey = (k) => /^\d{4}-\d{2}-\d{2}$/.test(k);
+    const welcomeLine = document.getElementById("welcomeLine");
+    const summaryEl   = document.getElementById("summary");
 
-    // Order: All Week, Places, then chronological ISO dates
-    const orderedKeys = [
-      "ALL_WEEK",
-      "PLACES",
-      ...Object.keys(eventsData).filter(isISODateKey).sort()
-    ].filter(k => eventsData[k]);
+    const editBtn   = document.getElementById("editBtn");
+    const forgetBtn = document.getElementById("forgetBtn");
 
-    let currentDay = orderedKeys[0];
-    let currentFilter = "all";
-    let searchTerm = "";
+    function show(el) { el.classList.remove("hidden"); }
+    function hide(el) { el.classList.add("hidden"); }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      renderDayTabs();
-      renderEvents();
-      setupEventListeners();
-      updateStats();
-      setupGateForm();
-    });
+    function safeParse(json) {
+      try { return JSON.parse(json); } catch { return null; }
+    }
 
-    // --- Gate Form ---
-    function setupGateForm() {
-      const gateForm = document.getElementById("leadForm");
-      const formMessage = document.getElementById("formMessage");
-      const gateWrapper = document.getElementById("gate-wrapper");
-      const siteContent = document.getElementById("site-content");
-      if (!gateForm) return;
+    function getSavedIntake() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return null;
+      const parsed = safeParse(raw);
+      // Basic shape check
+      if (!parsed || typeof parsed !== "object") return null;
+      return parsed;
+    }
 
-      gateForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
+    function saveIntake(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        ...data,
+        savedAt: new Date().toISOString()
+      }));
+    }
 
-        formMessage.textContent = "Submitting...";
-        formMessage.style.color = "rgba(175,194,230,0.85)";
+    function clearIntake() {
+      localStorage.removeItem(STORAGE_KEY);
+    }
 
-        const name = document.getElementById("name").value.trim();
-        const phone = document.getElementById("phone").value.trim();
-        const email = document.getElementById("email").value.trim();
-        const roles = Array.from(document.querySelectorAll('input[name="role"]:checked')).map(cb => cb.value).join(",");
+    function formToObject(form) {
+      const fd = new FormData(form);
+      const obj = {};
+      for (const [k, v] of fd.entries()) obj[k] = String(v).trim();
+      return obj;
+    }
 
-        if (!roles) {
-          formMessage.textContent = "Please select at least one role.";
-          formMessage.style.color = "#ffb4b4";
-          return;
+    function fillFormFromSaved(saved) {
+      // Fill known fields back into the form
+      for (const [key, value] of Object.entries(saved)) {
+        const input = intakeForm.querySelector(`[name="${CSS.escape(key)}"]`);
+        if (input && (input.tagName === "INPUT" || input.tagName === "TEXTAREA" || input.tagName === "SELECT")) {
+          input.value = value;
         }
-
-        try {
-          await fetch(FORM_ENDPOINT, {
-            method: "POST",
-            mode: "no-cors",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, phone, email, role: roles })
-          });
-
-          formMessage.textContent = "Thanks! Loading guide...";
-          formMessage.style.color = "#bfe2ff";
-
-          setTimeout(() => {
-            gateWrapper.style.display = "none";
-            siteContent.style.display = "block";
-            window.scrollTo(0, 0);
-          }, 500);
-        } catch (err) {
-          console.error(err);
-          formMessage.textContent = "Something went wrong. Please try again.";
-          formMessage.style.color = "#ffb4b4";
-        }
-      });
-    }
-
-    // --- Tabs ---
-    function renderDayTabs() {
-      const tabsContainer = document.getElementById("dayTabs");
-      tabsContainer.innerHTML = "";
-
-      orderedKeys.forEach((key) => {
-        const dayData = eventsData[key];
-        const tab = document.createElement("button");
-        tab.className = `day-tab ${key === currentDay ? "active" : ""}`;
-        tab.dataset.date = key;
-
-        // Label logic:
-        // - ISO date => show day number + short day
-        // - Special => show section name
-        if (isISODateKey(key)) {
-          const dayNum = (dayData.month_day || "").split(" ")[1] || key.split("-")[2];
-          tab.innerHTML = `
-            <span>
-              ${dayNum}
-              <span class="day-name">${(dayData.day_name || "").slice(0,3)}</span>
-            </span>
-          `;
-        } else {
-          tab.innerHTML = `
-            <span>
-              ${dayData.day_name}
-              <span class="day-name">${dayData.month_day}</span>
-            </span>
-          `;
-        }
-
-        tab.addEventListener("click", () => selectDay(key));
-        tabsContainer.appendChild(tab);
-      });
-
-      document.getElementById("totalDays").textContent = orderedKeys.length;
-    }
-
-    function selectDay(key) {
-      currentDay = key;
-      document.querySelectorAll(".day-tab").forEach(tab => {
-        tab.classList.toggle("active", tab.dataset.date === key);
-      });
-      renderEvents();
-      updateStats();
-    }
-
-    // --- Rendering ---
-    function renderEvents() {
-      const main = document.getElementById("mainContent");
-      const dayData = eventsData[currentDay];
-
-      let filteredEvents = (dayData.events || []).filter(ev => {
-        const hay = [
-          ev.event, ev.organizer, ev.address, ev.note, ev.vibe, ev.door
-        ].filter(Boolean).join(" ").toLowerCase();
-
-        const matchesSearch = !searchTerm || hay.includes(searchTerm.toLowerCase());
-
-        let matchesFilter = true;
-        if (currentFilter === "all") matchesFilter = true;
-        else if (currentFilter === "allweek") matchesFilter = (currentDay === "ALL_WEEK");
-        else if (currentFilter === "places") matchesFilter = (currentDay === "PLACES");
-        else if (currentFilter === "rsvp") matchesFilter = (ev.door || "").toLowerCase().includes("rsvp") || (ev.link || "").startsWith("http");
-        else if (currentFilter === "on") matchesFilter = (ev.organizer || "").toLowerCase().includes("on");
-        else if (currentFilter === "off") matchesFilter = (ev.organizer || "").toLowerCase().includes("off");
-
-        return matchesSearch && matchesFilter;
-      });
-
-      main.innerHTML = `
-        <section class="day-section active">
-          <div class="day-header">
-            <h2 class="day-title">${dayData.day_name}${isISODateKey(currentDay) ? `, ${dayData.month_day}` : ""}</h2>
-            <p class="event-count">${filteredEvents.length} entries</p>
-          </div>
-
-          ${filteredEvents.length ? `
-            <div class="events-grid">
-              ${filteredEvents.map(ev => createEventCard(ev)).join("")}
-            </div>
-          ` : `
-            <div class="no-results">
-              <h3>No results</h3>
-              <p>Try a different search term or filter.</p>
-            </div>
-          `}
-        </section>
-      `;
-
-      document.getElementById("currentDayEvents").textContent = filteredEvents.length;
-    }
-
-    function createEventCard(ev) {
-      const timeDisplay = formatTime(ev.start);
-      const endDisplay = ev.end ? ` - ${formatTime(ev.end)}` : "";
-      const safeJson = JSON.stringify(ev).replace(/"/g, "&quot;");
-
-      const tags = [];
-      if (ev.vibe) tags.push(`<span class="meta-tag vibe">${escapeHtml(ev.vibe)}</span>`);
-      if (ev.door) tags.push(`<span class="meta-tag rsvp">${escapeHtml(ev.door)}</span>`);
-      if (ev.organizer) tags.push(`<span class="meta-tag">${escapeHtml(ev.organizer)}</span>`);
-
-      const shortAddr = truncate(ev.address || "", 90);
-
-      return `
-        <article class="event-card" onclick="openModal(${safeJson})">
-          <div class="event-time">
-            <span class="time-badge">${timeDisplay}${endDisplay}</span>
-          </div>
-          <h3 class="event-name">${escapeHtml(ev.event || "Untitled")}</h3>
-          ${ev.organizer ? `<p class="event-organizer">${escapeHtml(ev.organizer)}</p>` : ""}
-          ${ev.address ? `<p class="event-address">${escapeHtml(shortAddr)}</p>` : ""}
-          <div class="event-meta">${tags.join("")}</div>
-          <button class="event-link" onclick="event.stopPropagation(); openModal(${safeJson})">
-            View Details →
-          </button>
-        </article>
-      `;
-    }
-
-    function formatTime(time) {
-      if (!time || time === "TBA") return "TBA";
-      const parts = String(time).split(":");
-      if (parts.length >= 2) {
-        let hours = parseInt(parts[0], 10);
-        const minutes = parts[1];
-        const ampm = hours >= 12 ? "PM" : "AM";
-        hours = hours % 12 || 12;
-        return `${hours}:${minutes} ${ampm}`;
       }
-      return time;
     }
 
-    function truncate(text, length) {
-      if (!text) return "";
-      return text.length > length ? text.slice(0, length) + "..." : text;
+    function renderMain(saved) {
+      const name = [saved.firstName, saved.lastName].filter(Boolean).join(" ").trim() || "there";
+      welcomeLine.textContent = `Good to see you again, ${name}.`;
+
+      // Render summary (optional)
+      const rows = [
+        ["Name", name],
+        ["Email", saved.email || "—"],
+        ["Country", saved.country || "—"],
+        ["Interest", saved.interest || "—"],
+      ];
+
+      summaryEl.innerHTML = rows.map(([k, v]) => `
+        <div class="k">${k}</div>
+        <div>${escapeHtml(v)}</div>
+      `).join("");
+
+      hide(intakeView);
+      show(mainView);
+    }
+
+    function renderIntake() {
+      hide(mainView);
+      show(intakeView);
     }
 
     function escapeHtml(str) {
       return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
     }
 
-    function updateStats() {
-      const total = Object.values(eventsData).reduce((sum, day) => sum + (day.events ? day.events.length : 0), 0);
-      document.getElementById("totalEvents").textContent = total;
-    }
+    // On load, decide which view to show
+    (function init() {
+      const saved = getSavedIntake();
+      if (saved) renderMain(saved);
+      else renderIntake();
+    })();
 
-    // --- Listeners ---
-    function setupEventListeners() {
-      document.getElementById("searchInput").addEventListener("input", (e) => {
-        searchTerm = e.target.value;
-        renderEvents();
-      });
+    // Save intake & continue
+    intakeForm.addEventListener("submit", (e) => {
+      e.preventDefault();
 
-      document.querySelectorAll(".filter-btn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
-          btn.classList.add("active");
-          currentFilter = btn.dataset.filter;
-          renderEvents();
-        });
-      });
+      const data = formToObject(intakeForm);
 
-      document.getElementById("modal").addEventListener("click", (e) => {
-        if (e.target.id === "modal") closeModal();
-      });
+      // Example required fields check (keep or remove as needed)
+      if (!data.firstName || !data.lastName || !data.email || !data.interest) {
+        alert("Please complete the required fields.");
+        return;
+      }
 
-      document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") closeModal();
-      });
-    }
+      saveIntake(data);
+      renderMain(getSavedIntake());
+    });
 
-    // --- Modal ---
-    function openModal(ev) {
-      const modal = document.getElementById("modal");
-      document.getElementById("modalTitle").textContent = ev.event || "Untitled";
-      document.getElementById("modalOrganizer").textContent = ev.organizer || "";
+    // Reset button on form
+    clearBtn.addEventListener("click", () => {
+      intakeForm.reset();
+      clearIntake();
+      renderIntake();
+    });
 
-      const linkBlock = (ev.link && String(ev.link).startsWith("http"))
-        ? `<a href="${ev.link}" target="_blank" class="event-link" style="margin-top: 14px; display:inline-flex;">Open Link / RSVP →</a>`
-        : "";
+    // Edit details (brings them back to form with saved values filled)
+    editBtn.addEventListener("click", () => {
+      const saved = getSavedIntake();
+      if (!saved) return renderIntake();
 
-      document.getElementById("modalDetails").innerHTML = `
-        <div class="detail-row">
-          <div class="detail-icon">🕐</div>
-          <div class="detail-content">
-            <h4>Time</h4>
-            <p>${formatTime(ev.start)}${ev.end ? " - " + formatTime(ev.end) : ""}</p>
-          </div>
-        </div>
-        <div class="detail-row">
-          <div class="detail-icon">📍</div>
-          <div class="detail-content">
-            <h4>Location</h4>
-            <p>${ev.address || "TBA"}</p>
-          </div>
-        </div>
-        <div class="detail-row">
-          <div class="detail-icon">🎟️</div>
-          <div class="detail-content">
-            <h4>Access</h4>
-            <p>${ev.door || "Info"}</p>
-          </div>
-        </div>
-        ${ev.note ? `
-          <div class="detail-row">
-            <div class="detail-icon">📝</div>
-            <div class="detail-content">
-              <h4>Notes</h4>
-              <p>${escapeHtml(ev.note)}</p>
-            </div>
-          </div>
-        ` : ""}
-        ${linkBlock}
-      `;
+      renderIntake();
+      fillFormFromSaved(saved);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
 
-      modal.classList.add("active");
-      document.body.style.overflow = "hidden";
-    }
-
-    function closeModal() {
-      document.getElementById("modal").classList.remove("active");
-      document.body.style.overflow = "";
-    }
+    // Forget device (clears localStorage and forces form next time)
+    forgetBtn.addEventListener("click", () => {
+      clearIntake();
+      renderIntake();
+      intakeForm.reset();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
   </script>
 </body>
 </html>

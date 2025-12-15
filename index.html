@@ -728,23 +728,19 @@
   </div>
 
   <script>
-    // ================================
-    // CONFIG (ONLY CHANGE IS EVENTS LOADING)
-    // ================================
-
-    // ✅ Your Web App deployment (used for BOTH: lead capture POST + events GET)
-    const FORM_ENDPOINT  = 'https://script.google.com/macros/s/AKfycbzgiJETsUIFtpZkrCzh_gUVFXklskFyNNeXqnTSbSHaXG14uEAa1DEBgDhGS7xClXim/exec';
+    // === GOOGLE SHEETS WEB APP (EVENTS SOURCE) ===
+    // This MUST be your deployed Apps Script "web app" that returns the sheet rows as JSON.
     const EVENTS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzgiJETsUIFtpZkrCzh_gUVFXklskFyNNeXqnTSbSHaXG14uEAa1DEBgDhGS7xClXim/exec';
 
-    // ✅ Gate "remember me" (prevents form from loading every time)
+    // === GOOGLE SHEETS FORM ENDPOINT (LEAD CAPTURE) ===
+    // Keep this as your lead form endpoint.
+    const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbxiVttnF2evrhwNsdRRgL506mAaYynEDNWEMd-5lWY4k5B_jzKiWr7AmbBOB-XY8JiM/exec';
+
+    // === LOCAL GATE MEMORY (SKIP FORM NEXT TIME ON SAME DEVICE) ===
     const GATE_STORAGE_KEY = "davos_gate:v1";
 
-    // ================================
-    // EVENTS DATA (NOW LOADED FROM SHEET)
-    // ================================
-    let eventsData = {};  // filled by loadEventsFromSheet()
-
-    // --- State ---
+    // === EVENTS STATE (LOADED LIVE) ===
+    let eventsData = {}; // populated from sheet
     const isISODateKey = (k) => /^\d{4}-\d{2}-\d{2}$/.test(k);
 
     let orderedKeys = [];
@@ -753,214 +749,52 @@
     let searchTerm = "";
 
     document.addEventListener("DOMContentLoaded", async () => {
-      // Load events first (so tabs + totals are correct)
-      await loadEventsFromSheet();
+      setupGateForm();
 
-      // If sheet is empty / endpoint fails, create a safe empty shell
-      if (!eventsData || Object.keys(eventsData).length === 0) {
-        eventsData = {
-          "ALL_WEEK": { day_name: "All Week", month_day: "Jan 17–23", events: [] }
-        };
+      // If already unlocked on this device, skip the gate immediately
+      if (getGateSaved()) {
+        unlockGuideUI();
       }
 
-      // Order: All Week, Places (if exists), then chronological ISO dates
-      orderedKeys = [
-        "ALL_WEEK",
-        "PLACES",
-        ...Object.keys(eventsData).filter(isISODateKey).sort()
-      ].filter(k => eventsData[k]);
+      // Load events from the deployed web app
+      await loadEventsFromSheet();
 
-      currentDay = orderedKeys[0] || "ALL_WEEK";
-
+      // Render UI after data exists
+      buildOrderedKeys();
       renderDayTabs();
       renderEvents();
       setupEventListeners();
       updateStats();
-      setupGateForm();
     });
 
-    // ================================
-    // LOAD EVENTS FROM GOOGLE SHEET (WEB APP JSON)
-    // ================================
-    async function loadEventsFromSheet() {
+    // --- Gate Memory ---
+    function getGateSaved() {
       try {
-        const res = await fetch(EVENTS_ENDPOINT, { method: "GET" });
-        const data = await res.json();
-
-        // Expected shape:
-        // { ok:true, rows:[ { "House/Event Name": "...", "ON/OFF Promenade ?":"ON", "Date":"All Week" or "1/19/2026 16:00", "Event Website":"", "RSVP Link":"", "Location":"", "Notes":"" }, ... ] }
-        const rows = Array.isArray(data?.rows) ? data.rows : [];
-
-        const grouped = {};
-
-        for (const row of rows) {
-          // Pull by exact headers (with a little tolerance)
-          const name = pick(row, ["House/Event Name", "House/Event name", "House/EventName", "House/Event"]);
-          if (!name) continue;
-
-          const promenade = pick(row, ["ON/OFF Promenade ?", "ON/OFF Promenade?", "ON/OFF Promenade", "Promenade"]);
-          const dateRaw   = pick(row, ["Date", "date"]);
-          const siteLink  = pick(row, ["Event Website", "EventWebsite", "Website"]);
-          const rsvpLink  = pick(row, ["RSVP Link", "RSVP", "RSVPLink"]);
-          const location  = pick(row, ["Location", "location"]);
-          const notes     = pick(row, ["Notes", "Note", "notes"]);
-
-          const link = (rsvpLink && String(rsvpLink).trim() && String(rsvpLink).trim() !== "-")
-            ? String(rsvpLink).trim()
-            : (siteLink && String(siteLink).trim() && String(siteLink).trim() !== "-")
-              ? String(siteLink).trim()
-              : "";
-
-          // Determine which tab this belongs to
-          const { key, day_name, month_day, start, end } = normalizeDateKey(dateRaw);
-
-          if (!grouped[key]) grouped[key] = { day_name, month_day, events: [] };
-
-          grouped[key].events.push({
-            event: String(name).trim(),
-            organizer: (promenade && String(promenade).trim() !== "-") ? String(promenade).trim() : "",
-            address: (location && String(location).trim() !== "-") ? String(location).trim() : "",
-            start: start || "TBA",
-            end: end || "",
-            door: link ? "RSVP" : "Info",
-            vibe: "House",
-            link,
-            food: false,
-            bar: false,
-            note: (notes && String(notes).trim() !== "-") ? String(notes).trim() : ""
-          });
-        }
-
-        // If your sheet has "All Week" rows, make sure ALL_WEEK exists
-        if (!grouped["ALL_WEEK"]) {
-          grouped["ALL_WEEK"] = { day_name: "All Week", month_day: "Jan 17–23", events: [] };
-        }
-
-        // Optional: sort events within each day by time (when possible)
-        for (const k of Object.keys(grouped)) {
-          grouped[k].events.sort((a, b) => timeSortKey(a.start) - timeSortKey(b.start));
-        }
-
-        eventsData = grouped;
-      } catch (err) {
-        console.error("Failed to load events from sheet:", err);
-        eventsData = {};
+        const raw = localStorage.getItem(GATE_STORAGE_KEY);
+        if (!raw) return null;
+        const obj = JSON.parse(raw);
+        if (!obj || typeof obj !== "object") return null;
+        return obj;
+      } catch {
+        return null;
       }
     }
-
-    function pick(obj, keys) {
-      for (const k of keys) {
-        if (obj && Object.prototype.hasOwnProperty.call(obj, k)) {
-          const v = obj[k];
-          if (v !== null && v !== undefined && String(v).trim() !== "") return v;
-        }
-      }
-      return "";
+    function saveGate(data) {
+      localStorage.setItem(GATE_STORAGE_KEY, JSON.stringify({ ...data, savedAt: new Date().toISOString() }));
+    }
+    function unlockGuideUI() {
+      const gateWrapper = document.getElementById("gate-wrapper");
+      const siteContent = document.getElementById("site-content");
+      if (gateWrapper) gateWrapper.style.display = "none";
+      if (siteContent) siteContent.style.display = "block";
+      window.scrollTo(0, 0);
     }
 
-    function normalizeDateKey(dateVal) {
-      const raw = (dateVal ?? "").toString().trim();
-
-      // 1) All Week / Places
-      if (!raw || raw === "-" || raw.toLowerCase() === "tba") {
-        return { key: "ALL_WEEK", day_name: "All Week", month_day: "Jan 17–23", start: "TBA", end: "" };
-      }
-      const low = raw.toLowerCase();
-      if (low === "all week" || low === "allweek") {
-        return { key: "ALL_WEEK", day_name: "All Week", month_day: "Jan 17–23", start: "TBA", end: "" };
-      }
-      if (low === "places" || low === "place") {
-        return { key: "PLACES", day_name: "Places", month_day: "Jan 17–23", start: "TBA", end: "" };
-      }
-
-      // 2) Parse "1/19/2026 16:00" or "1/19/2026 16:00 - 18:00"
-      //    We'll split on " - " if present.
-      let startPart = raw;
-      let endPart = "";
-      const dashSplit = raw.split(" - ");
-      if (dashSplit.length >= 2) {
-        startPart = dashSplit[0].trim();
-        endPart = dashSplit.slice(1).join(" - ").trim();
-      }
-
-      const startDate = parseUSDateTime(startPart);
-      if (startDate) {
-        const isoKey = startDate.toISOString().slice(0,10);
-        const day_name = startDate.toLocaleDateString("en-US", { weekday: "long" });
-        const month_day = startDate.toLocaleDateString("en-US", { month: "long", day: "numeric" });
-        const start = toHHMMSS(startDate);
-        const end = endPart ? parseEndTime(endPart, startDate) : "";
-        return { key: isoKey, day_name, month_day, start, end };
-      }
-
-      // 3) If it can't parse, throw it into ALL_WEEK instead of losing it
-      return { key: "ALL_WEEK", day_name: "All Week", month_day: "Jan 17–23", start: "TBA", end: "" };
-    }
-
-    function parseUSDateTime(s) {
-      // Accept: M/D/YYYY HH:mm or M/D/YYYY H:mm or with seconds
-      // Also accept: MM/DD/YYYY HH:mm
-      const str = String(s || "").trim();
-      const m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?$/);
-      if (!m) return null;
-
-      const mm = parseInt(m[1], 10);
-      const dd = parseInt(m[2], 10);
-      const yyyy = parseInt(m[3], 10);
-      const hh = m[4] ? parseInt(m[4], 10) : 0;
-      const min = m[5] ? parseInt(m[5], 10) : 0;
-      const sec = m[6] ? parseInt(m[6], 10) : 0;
-
-      const d = new Date(yyyy, mm - 1, dd, hh, min, sec);
-      if (Number.isNaN(d.getTime())) return null;
-      return d;
-    }
-
-    function parseEndTime(endStr, startDate) {
-      // Accept "18:00" or "6:00" or "18:00:00"
-      const t = String(endStr || "").trim();
-      const m = t.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
-      if (!m) return "";
-      const hh = parseInt(m[1], 10);
-      const mm = parseInt(m[2], 10);
-      const ss = m[3] ? parseInt(m[3], 10) : 0;
-      const d = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), hh, mm, ss);
-      return toHHMMSS(d);
-    }
-
-    function toHHMMSS(d) {
-      const hh = String(d.getHours()).padStart(2, "0");
-      const mm = String(d.getMinutes()).padStart(2, "0");
-      const ss = String(d.getSeconds()).padStart(2, "0");
-      return `${hh}:${mm}:${ss}`;
-    }
-
-    function timeSortKey(t) {
-      if (!t || t === "TBA") return 999999;
-      const parts = String(t).split(":");
-      if (parts.length < 2) return 999999;
-      const hh = parseInt(parts[0], 10) || 0;
-      const mm = parseInt(parts[1], 10) || 0;
-      const ss = parts[2] ? (parseInt(parts[2], 10) || 0) : 0;
-      return hh * 3600 + mm * 60 + ss;
-    }
-
-    // ================================
-    // GATE FORM (WITH LOCAL "REMEMBER ME")
-    // ================================
+    // --- Gate Form ---
     function setupGateForm() {
       const gateForm = document.getElementById("leadForm");
       const formMessage = document.getElementById("formMessage");
-      const gateWrapper = document.getElementById("gate-wrapper");
-      const siteContent = document.getElementById("site-content");
       if (!gateForm) return;
-
-      // ✅ If already saved, skip form
-      const saved = localStorage.getItem(GATE_STORAGE_KEY);
-      if (saved) {
-        gateWrapper.style.display = "none";
-        siteContent.style.display = "block";
-      }
 
       gateForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -979,6 +813,9 @@
           return;
         }
 
+        // Save locally so the intake won't show again on this device
+        saveGate({ name, phone, email, role: roles });
+
         try {
           await fetch(FORM_ENDPOINT, {
             method: "POST",
@@ -987,25 +824,187 @@
             body: JSON.stringify({ name, phone, email, role: roles })
           });
 
-          // ✅ remember locally so form doesn't show again on this device
-          localStorage.setItem(GATE_STORAGE_KEY, JSON.stringify({
-            name, phone, email, role: roles, savedAt: new Date().toISOString()
-          }));
-
           formMessage.textContent = "Thanks! Loading guide...";
           formMessage.style.color = "#bfe2ff";
 
           setTimeout(() => {
-            gateWrapper.style.display = "none";
-            siteContent.style.display = "block";
-            window.scrollTo(0, 0);
+            unlockGuideUI();
           }, 500);
         } catch (err) {
           console.error(err);
-          formMessage.textContent = "Something went wrong. Please try again.";
-          formMessage.style.color = "#ffb4b4";
+          // Even if submission fails, the user is still unlocked on this device (because we saved locally)
+          formMessage.textContent = "Thanks! Loading guide...";
+          formMessage.style.color = "#bfe2ff";
+          setTimeout(() => unlockGuideUI(), 300);
         }
       });
+    }
+
+    // --- Load Events from Sheet Web App ---
+    async function loadEventsFromSheet() {
+      // Initialize with empty containers so UI doesn't break
+      eventsData = {
+        "ALL_WEEK": { day_name: "All Week", month_day: "Jan 17–23", events: [] },
+        "PLACES":   { day_name: "Places",  month_day: "Jan 17–23", events: [] }
+      };
+
+      try {
+        const res = await fetch(EVENTS_ENDPOINT, { method: "GET", cache: "no-store" });
+        const json = await res.json();
+
+        const rows = normalizeRows(json);
+
+        // Build eventsData from rows
+        for (const row of rows) {
+          const name = getVal(row, ["House/Event Name", "House / Event Name", "House Event Name", "Event", "Event Name"]);
+          const organizer = getVal(row, ["ON/OFF Promenade ?", "ON/OFF Promenade", "ON OFF Promenade", "Promenade", "ON/OFF"]);
+          const dateCell = getVal(row, ["Date", "DATE"]);
+          const website = getVal(row, ["Event Website", "Website", "Event Website "]);
+          const rsvp = getVal(row, ["RSVP Link", "RSVP", "RSVP link"]);
+          const location = getVal(row, ["Location", "LOCATION"]);
+          const notes = getVal(row, ["Notes", "NOTE", "Notes "]);
+
+          const evName = String(name || "").trim();
+          const lowerName = evName.toLowerCase();
+
+          // Skip header/label/blank rows (this removes the bogus "List of Events" card)
+          if (!evName) continue;
+          if (lowerName === "list of events") continue;
+          if (lowerName === "house/event name" || lowerName === "house / event name" || lowerName === "event name") continue;
+
+          const { dayKey, start } = parseSheetDateCell(dateCell);
+
+          // Decide: ALL_WEEK vs PLACES vs ISO date
+          // PLACES heuristic: All Week row AND no links (or looks like a location POI)
+          const hasAnyLink = isHttp(rsvp) || isHttp(website);
+          const looksLikePlace = /congress hall|ice village|kurpark|registration|media village|the dome|jakobshorn|openai house|google house|goals house|human change house/i.test(lowerName);
+
+          let bucketKey = dayKey || "ALL_WEEK";
+          if (bucketKey === "ALL_WEEK" && (!hasAnyLink || looksLikePlace)) {
+            // Keep "places" separate if it appears to be a POI / location row
+            // (and still allow all-week items with links to remain in All Week)
+            if (looksLikePlace || (!hasAnyLink && !String(notes||"").trim())) bucketKey = "PLACES";
+          }
+
+          if (!eventsData[bucketKey]) {
+            // Create day bucket if ISO date
+            if (isISODateKey(bucketKey)) {
+              const d = new Date(`${bucketKey}T00:00:00`);
+              const dayName = d.toLocaleDateString("en-US", { weekday: "long" });
+              const monthDay = d.toLocaleDateString("en-US", { month: "long", day: "numeric" });
+              eventsData[bucketKey] = { day_name: dayName, month_day: monthDay, events: [] };
+            } else {
+              // Fallback
+              eventsData[bucketKey] = { day_name: bucketKey, month_day: "Jan 17–23", events: [] };
+            }
+          }
+
+          const chosenLink = isHttp(rsvp) ? rsvp : (isHttp(website) ? website : "");
+
+          const ev = {
+            event: evName,
+            organizer: String(organizer || "").trim(),
+            address: String(location || "").trim(),
+            start: start || "TBA",
+            end: "",
+            door: isHttp(rsvp) ? "RSVP" : "Info",
+            vibe: bucketKey === "PLACES" ? "Place" : "House",
+            link: chosenLink,
+            food: false,
+            bar: false,
+            note: String(notes || "").trim()
+          };
+
+          // Extra garbage-row guard: if it has basically nothing besides a name, drop it
+          const hasAnyOtherData = Boolean(
+            ev.address || ev.organizer || ev.note || ev.link || (ev.start && ev.start !== "TBA")
+          );
+          if (!hasAnyOtherData) continue;
+
+          eventsData[bucketKey].events.push(ev);
+        }
+
+      } catch (err) {
+        console.error("Failed to load events from sheet:", err);
+        // Keep empty state; UI will show "No results"
+      }
+    }
+
+    function normalizeRows(json) {
+      // Accept a few common shapes:
+      // - Array of objects: [{...}, {...}]
+      // - { data: [...] } or { rows: [...] } or { items: [...] }
+      // - { data: { rows: [...] } }
+      if (Array.isArray(json)) return json;
+      if (json && Array.isArray(json.data)) return json.data;
+      if (json && Array.isArray(json.rows)) return json.rows;
+      if (json && Array.isArray(json.items)) return json.items;
+      if (json && json.data && Array.isArray(json.data.rows)) return json.data.rows;
+      return [];
+    }
+
+    function getVal(row, keys) {
+      for (const k of keys) {
+        if (row && Object.prototype.hasOwnProperty.call(row, k)) return row[k];
+      }
+      // Try case-insensitive match
+      const lowerMap = {};
+      if (row && typeof row === "object") {
+        for (const [k, v] of Object.entries(row)) lowerMap[String(k).toLowerCase()] = v;
+      }
+      for (const k of keys) {
+        const v = lowerMap[String(k).toLowerCase()];
+        if (v !== undefined) return v;
+      }
+      return "";
+    }
+
+    function isHttp(val) {
+      return typeof val === "string" && val.trim().toLowerCase().startsWith("http");
+    }
+
+    function parseSheetDateCell(raw) {
+      const s = String(raw || "").trim();
+      if (!s) return { dayKey: "ALL_WEEK", start: "TBA" };
+
+      // All Week rows
+      if (/all\s*week/i.test(s)) return { dayKey: "ALL_WEEK", start: "TBA" };
+
+      // Strip any trailing " - ..." parts
+      const cleaned = s.split(" - ")[0].trim();
+
+      // Match: M/D/YYYY H:MM (24h)
+      const m = cleaned.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})/);
+      if (!m) return { dayKey: "ALL_WEEK", start: "TBA" };
+
+      const mm = String(m[1]).padStart(2, "0");
+      const dd = String(m[2]).padStart(2, "0");
+      const yyyy = m[3];
+      const hh = String(m[4]).padStart(2, "0");
+      const min = m[5];
+
+      return {
+        dayKey: `${yyyy}-${mm}-${dd}`,
+        start: `${hh}:${min}:00`
+      };
+    }
+
+    function buildOrderedKeys() {
+      // Order: All Week, Places, then chronological ISO dates
+      orderedKeys = [
+        "ALL_WEEK",
+        "PLACES",
+        ...Object.keys(eventsData).filter(isISODateKey).sort()
+      ].filter(k => eventsData[k] && Array.isArray(eventsData[k].events));
+
+      // Ensure we land on a real tab
+      if (!eventsData[currentDay]) currentDay = orderedKeys[0] || "ALL_WEEK";
+      if (!eventsData[currentDay]) {
+        // As absolute fallback
+        eventsData["ALL_WEEK"] = eventsData["ALL_WEEK"] || { day_name: "All Week", month_day: "Jan 17–23", events: [] };
+        orderedKeys = ["ALL_WEEK"];
+        currentDay = "ALL_WEEK";
+      }
     }
 
     // --- Tabs ---
@@ -1019,9 +1018,6 @@
         tab.className = `day-tab ${key === currentDay ? "active" : ""}`;
         tab.dataset.date = key;
 
-        // Label logic:
-        // - ISO date => show day number + short day
-        // - Special => show section name
         if (isISODateKey(key)) {
           const dayNum = (dayData.month_day || "").split(" ")[1] || key.split("-")[2];
           tab.innerHTML = `
@@ -1058,7 +1054,7 @@
     // --- Rendering ---
     function renderEvents() {
       const main = document.getElementById("mainContent");
-      const dayData = eventsData[currentDay] || { day_name: "All Week", month_day: "Jan 17–23", events: [] };
+      const dayData = eventsData[currentDay] || { day_name: "", month_day: "", events: [] };
 
       let filteredEvents = (dayData.events || []).filter(ev => {
         const hay = [
